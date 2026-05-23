@@ -89,7 +89,7 @@ body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0f766e
       <div class="quiz-badge">Quiz 4</div>
       <span class="level-tag">C1 Advanced</span>
       <h1>Mixed Grammar Review</h1>
-      <p style="color:#666;font-size:.9em">Class 15 Quiz · Term 1/2026</p>
+      <p style="color:#666;font-size:.9em">Class 15 Quiz</p>
     </div>
     <div class="card start-card">
       <h2>Welcome! 👋</h2>
@@ -104,12 +104,12 @@ body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0f766e
         <input type="text" id="studentName" placeholder="Enter your full name...">
       </div>
       <select id="studentClass" style="width:100%;padding:14px;border:2px solid #e0e0e0;border-radius:12px;font-size:16px;margin-bottom:15px">
-          <option value="">-- Select your class --</option>
-          <optgroup label="Angela Gradiska">
-            <option value="3091 - Mon/Wed 6:30 PM (Angela)">Mon/Wed 6:30 PM - 8:00 PM (Angela)</option>
-            <option value="3093 - Mon/Wed 8:30 PM (Angela)">Mon/Wed 8:30 PM - 10:00 PM (Angela)</option>
-          </optgroup>
-        </select>
+  <option value="">-- Select your class --</option>
+  <optgroup label="Hector Amaya">
+    <option value="3095 - Mon/Wed 8:30 PM (Hector)">Mon/Wed 8:30 PM - 10:00 PM (Hector)</option>
+    <option value="3100 - Tue/Thu 6:30 PM (Hector)">Tue/Thu 6:30 PM - 8:00 PM (Hector)</option>
+  </optgroup>
+</select>
       <button class="btn" onclick="startQuiz()">Start Quiz →</button>
     </div>
   </div>
@@ -152,9 +152,7 @@ body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0f766e
     </div>
     <div id="newBadgeSection"></div>
     <div id="streakSection"></div>
-    <div style="background:#fff3cd;border:2px solid #f5a623;border-radius:14px;padding:16px;margin-bottom:12px;margin-top:20px;text-align:center;">
-      <p style="font-size:.9em;color:#856404;margin-bottom:10px;">⚠️ <strong>Two steps to submit:</strong><br>1️⃣ Click below → 2️⃣ Click <strong>Submit</strong> on the form</p>
-      <button id="formSubmitBtn" onclick="submitToTeacher()" style="background:linear-gradient(135deg,#f5a623,#e8470a);color:#fff;padding:20px;border-radius:14px;font-size:1.15em;font-weight:800;text-align:center;border:none;display:block;width:100%;box-sizing:border-box;letter-spacing:.5px;box-shadow:0 6px 20px rgba(245,166,35,.4);cursor:pointer;margin-top:20px;">📨 SUBMIT RESULTS TO TEACHER →</button>
+    <button id="formSubmitBtn" onclick="submitToTeacher()" style="background:linear-gradient(135deg,#f5a623,#e8470a);color:#fff;padding:20px;border-radius:14px;font-size:1.15em;font-weight:800;text-align:center;border:none;display:block;width:100%;box-sizing:border-box;letter-spacing:.5px;box-shadow:0 6px 20px rgba(245,166,35,.4);cursor:pointer;margin-top:20px;">📨 SUBMIT RESULTS TO TEACHER →</button>
 <div id="submitStatus" style="display:none;margin-top:16px;background:#f0fdf4;border:2px solid #22c55e;border-radius:12px;padding:16px;text-align:center;color:#15803d"></div>
     </div>
     
@@ -171,21 +169,23 @@ let questions=[],currentQuestion=0,score=0,xpEarned=0,answered=false,timerInterv
 function shuffle(a){const arr=[...a];for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
 function getProgress(){const s=localStorage.getItem(STORAGE_KEY);return s?JSON.parse(s):{quizzes:{},totalXP:0,streak:0,badges:[],name:'',studentClass:''};}
 function saveProgress(p){localStorage.setItem(STORAGE_KEY,JSON.stringify(p));}
-function startQuiz(){const progress=getProgress();studentName=progress.name||document.getElementById('studentName').value.trim();if(!studentName){alert('Please enter your name');return;}studentClass=progress.studentClass||(document.getElementById('studentClass')?document.getElementById('studentClass').value:'')||"";if(!studentClass){alert('Please select your class');return;}studentLevel=LEVEL;questions=shuffle([...allQuestions]);questions=questions.map(q=>{const opts=q.opts.map((o,i)=>{return{text:o,wasCorrect:i===q.correct}});const sh=shuffle(opts);return{...q,opts:sh.map(o=>o.text),correct:sh.findIndex(o=>o.wasCorrect)}});questions.forEach(q=>{if(!categoryResults[q.category])categoryResults[q.category]={correct:0,total:0};categoryResults[q.category].total++;});document.getElementById('startScreen').style.display='none';document.getElementById('quizScreen').style.display='block';document.getElementById('totalQ').textContent=questions.length;startTime=Date.now();startTimer();renderQuestion();}
+function startQuiz(){const progress=getProgress();studentName=document.getElementById('studentName').value.trim();if(!studentName){alert('Please enter your name');return;}studentClass=document.getElementById('studentClass')?document.getElementById('studentClass').value:'';;if(!studentClass){alert('Please select your class');return;}studentLevel=LEVEL;questions=[...allQuestions];questions.forEach(q=>{if(!categoryResults[q.category])categoryResults[q.category]={correct:0,total:0};categoryResults[q.category].total++;});document.getElementById('startScreen').style.display='none';document.getElementById('quizScreen').style.display='block';document.getElementById('totalQ').textContent=questions.length;startTime=Date.now();startTimer();renderQuestion();}
 function startTimer(){timerInterval=setInterval(()=>{timeLeft--;document.getElementById('timer').textContent=Math.floor(timeLeft/60)+':'+String(timeLeft%60).padStart(2,'0');if(timeLeft<=60)document.getElementById('timerBar').classList.add('warning');if(timeLeft<=0){clearInterval(timerInterval);finishQuiz();}},1000);}
 function renderQuestion(){const q=questions[currentQuestion];document.getElementById('currentQ').textContent=currentQuestion+1;document.getElementById('progressBar').style.width=((currentQuestion+1)/questions.length*100)+'%';let html=`<div class="question"><div class="question-header"><div class="question-num">${currentQuestion+1}</div><div class="question-text">${q.q}</div></div><div class="options">`;q.opts.forEach((o,i)=>{html+=`<div class="option" data-idx="${i}" onclick="selectOption(this)"><div class="option-letter">${String.fromCharCode(65+i)}</div><div class="option-text">${o}</div></div>`;});html+=`</div><div class="feedback" id="feedback"></div></div>`;document.getElementById('questionContainer').innerHTML=html;document.getElementById('checkBtn').disabled=true;document.getElementById('checkBtn').style.display='block';document.getElementById('nextBtn').style.display='none';answered=false;}
 function selectOption(el){if(answered)return;document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));el.classList.add('selected');document.getElementById('checkBtn').disabled=false;}
-function checkAnswer(){if(answered)return;answered=true;const sel=document.querySelector('.option.selected');if(!sel)return;const idx=parseInt(sel.dataset.idx),q=questions[currentQuestion],correct=idx===q.correct;if(correct)categoryResults[q.category].correct++;document.querySelectorAll('.option').forEach(o=>o.classList.add('disabled'));if(correct){sel.classList.add('correct');score++;xpEarned+=10;document.getElementById('currentXP').textContent=xpEarned;}else{sel.classList.add('incorrect');document.querySelectorAll('.option')[q.correct].classList.add('correct');}const fb=document.getElementById('feedback');fb.className='feedback '+(correct?'correct':'incorrect')+' show';fb.innerHTML=(correct?'✅ <strong>Correct!</strong> ':'❌ <strong>Not quite.</strong> ')+q.explanation;document.getElementById('checkBtn').style.display='none';document.getElementById('nextBtn').style.display='block';document.getElementById('nextBtn').textContent=currentQuestion<questions.length-1?'Next Question →':'See Results →';}
+function checkAnswer(){if(answered)return;answered=true;const sel=document.querySelector('.option.selected');if(!sel)return;const idx=parseInt(sel.dataset.idx),q=questions[currentQuestion],correct=idx===q.correct;if(correct)categoryResults[q.category].correct++;document.querySelectorAll('.option').forEach(o=>o.classList.add('disabled'));const chosenLetter=String.fromCharCode(65+idx);if(correct){sel.classList.add('correct');score++;xpEarned+=10;document.getElementById('currentXP').textContent=xpEarned;}else{sel.classList.add('incorrect');document.querySelectorAll('.option')[q.correct].classList.add('correct');}if(!window._questionResults)window._questionResults=[];window._questionResults.push('Q'+(currentQuestion+1)+':'+chosenLetter+(correct?'✓':'✗'));const fb=document.getElementById('feedback');fb.className='feedback '+(correct?'correct':'incorrect')+' show';fb.innerHTML=(correct?'✅ <strong>Correct!</strong> ':'❌ <strong>Not quite.</strong> ')+q.explanation;document.getElementById('checkBtn').style.display='none';document.getElementById('nextBtn').style.display='block';document.getElementById('nextBtn').textContent=currentQuestion<questions.length-1?'Next Question →':'See Results →';}
 function nextQuestion(){currentQuestion++;if(currentQuestion<questions.length)renderQuestion();else finishQuiz();}
 function finishQuiz(){clearInterval(timerInterval);const timeTaken=Math.round((Date.now()-startTime)/1000),percent=Math.round((score/questions.length)*100);if(percent===100)xpEarned+=20;else if(percent>=80)xpEarned+=10;if(timeTaken<180)xpEarned+=10;const progress=getProgress();progress.quizzes=progress.quizzes||{};progress.quizzes[QUIZ_ID]={score,total:questions.length,time:timeTaken,date:new Date().toISOString(),categories:categoryResults};progress.totalXP=(progress.totalXP||0)+xpEarned;const newBadges=[];progress.badges=progress.badges||[];if(!progress.badges.includes('first_steps')){progress.badges.push('first_steps');newBadges.push({name:'First Steps',icon:'🌟'});}if(percent===100&&!progress.badges.includes('sharpshooter')){progress.badges.push('sharpshooter');newBadges.push({name:'Sharpshooter',icon:'🎯'});}if(timeTaken<180&&!progress.badges.includes('speed_demon')){progress.badges.push('speed_demon');newBadges.push({name:'Speed Demon',icon:'⚡'});}const today=new Date().toDateString();if(progress.lastQuizDate!==today){progress.streak=(progress.streak||0)+1;progress.lastQuizDate=today;}if(progress.streak>=3&&!progress.badges.includes('on_fire')){progress.badges.push('on_fire');newBadges.push({name:'On Fire',icon:'🔥'});}const allQ=Object.values(progress.quizzes);if(allQ.length>=4&&allQ.every(q=>(q.score/q.total)>=0.8)&&!progress.badges.includes('c1_champion')){progress.badges.push('c1_champion');newBadges.push({name:'C1 Champion',icon:'🏆'});}saveProgress(progress);const{weakAreas,practiceHTML,status,practicePath}=generatePractice(percent);submitToForm(score,questions.length,percent,timeTaken,xpEarned,progress.totalXP,weakAreas,status,practicePath);document.getElementById('quizScreen').style.display='none';document.getElementById('resultsScreen').style.display='block';document.getElementById('finalScore').textContent=score+'/'+questions.length;document.getElementById('finalPercent').textContent=percent+'%';document.getElementById('earnedXP').textContent=xpEarned;document.getElementById('correctCount').textContent=score+'/'+questions.length;document.getElementById('timeTaken').textContent=Math.floor(timeTaken/60)+':'+String(timeTaken%60).padStart(2,'0');document.getElementById('xpEarned').textContent=xpEarned+' XP';let msg;if(percent===100)msg="🎉 PERFECT! You're amazing!";else if(percent>=90)msg="🌟 Excellent work!";else if(percent>=80)msg="👏 Great job!";else if(percent>=70)msg="👍 Good effort!";else if(percent>=60)msg="🌱 Keep practicing!";else msg="🤗 Don't give up!";document.getElementById('resultsMessage').textContent=msg;const ps=document.getElementById('practiceSection');if(percent>=80){ps.classList.add('success');document.getElementById('practiceTitle').innerHTML='✅ Great Job!';}document.getElementById('practiceContent').innerHTML=practiceHTML;if(newBadges.length>0){let h='';newBadges.forEach(b=>{h+=`<div class="new-badge"><div class="badge-icon">${b.icon}</div><h4>Badge Unlocked!</h4><p>${b.name}</p></div>`;});document.getElementById('newBadgeSection').innerHTML=h;}if(progress.streak>1)document.getElementById('streakSection').innerHTML=`<div class="streak-box"><div class="streak-num">🔥 ${progress.streak} Quiz Streak!</div></div>`;}
 function generatePractice(percent){const weak=[],strong=[];for(const[c,r]of Object.entries(categoryResults)){if(r.total>0&&(r.correct/r.total)<0.7)weak.push(c);else strong.push(c);}let html='';if(percent<60){html='<p style="color:#c62828;margin-bottom:15px;font-weight:600">Score below 60% — Please review:</p>';weak.forEach(a=>{if(practiceResources[a]){const r=practiceResources[a];html+=`<div class="practice-item"><h4>⚠️ ${r.title}</h4><p>${r.description}</p><ul>${r.tips.map(t=>`<li>${t}</li>`).join('')}</ul><a href="${r.link}" target="_blank">📺 Watch Videos</a></div>`;}});}else if(percent<80){html='<p style="margin-bottom:15px">Consider reviewing:</p>';weak.forEach(a=>{if(practiceResources[a]){const r=practiceResources[a];html+=`<div class="practice-item"><h4>📖 ${r.title}</h4><p>${r.description}</p><a href="${r.link}" target="_blank">📺 Practice More</a></div>`;}});strong.forEach(a=>{if(practiceResources[a])html+=`<span class="strong-tag">✓ ${practiceResources[a].title}</span>`;});}else{html='<p style="color:#2e7d32;margin-bottom:10px">You did great on:</p>';Object.keys(practiceResources).forEach(a=>html+=`<span class="strong-tag">✓ ${practiceResources[a].title}</span>`);}const status=percent>=80?'Great work!':percent>=60?'Review Recommended':'Practice Required';const path=weak.length>0?weak.map(a=>practiceResources[a]?practiceResources[a].title:a).join(', '):'None needed';return{weakAreas:path,practiceHTML:html,status,practicePath:path};}
 function submitToForm(score,total,percent,time,xp,totalXP,weak,status,path){
-  const nameWithClass=studentName+' · '+studentClass;
   const timeStr=Math.floor(time/60)+':'+String(time%60).padStart(2,'0');
+  const qResults=(window._questionResults||[]).join(',');
   window._formPayload={
-    'entry.259682097': nameWithClass,
+    'entry.259682097': studentName,
+    'entry.1103266958': studentClass,
     'entry.2006644851': studentLevel,
     'entry.1804734502': QUIZ_NAME,
+    'entry.668038567': qResults,
     'entry.543583340': score+'/'+total,
     'entry.875764515': percent+'%',
     'entry.62512107': timeStr,
@@ -201,14 +201,17 @@ function submitToTeacher(){
   if(btn){btn.disabled=true;btn.textContent='⏳ Submitting...';}
   const formData=new FormData();
   if(window._formPayload){for(const[k,v]of Object.entries(window._formPayload)){formData.append(k,v);}}
-  fetch('https://docs.google.com/forms/d/e/1FAIpQLSd--80V_b4ovCyNW76LAYTbGy30gvafPtU39a3ijUWLO5mGng/formResponse',{method:'POST',mode:'no-cors',body:formData}).catch(function(){});
-  const status=document.getElementById('submitStatus');
-  if(status){status.innerHTML='✅ <strong>Results submitted successfully!</strong><br><span style="font-size:0.9em;color:#555">Your teacher has received your quiz results.</span>';status.style.display='block';}
+  fetch('https://docs.google.com/forms/d/e/1FAIpQLScHj1Kk6NX_L0ZOP2ehyRinaej4C7j1S4G1zaB4iCS5FoABtg/formResponse',{method:'POST',mode:'no-cors',body:formData}).catch(function(){});
+  const statusDiv=document.getElementById('submitStatus');
+  if(statusDiv){statusDiv.innerHTML='✅ <strong>Results submitted successfully!</strong><br><span style="font-size:0.9em;color:#555">Your teacher has received your quiz results.</span>';statusDiv.style.display='block';}
   if(btn){btn.style.display='none';}
 }
-function goToDashboard(){window.location.href='c1-quiz-dashboard.html';}
-function retryQuiz(){location.reload();}
-window.addEventListener('DOMContentLoaded',function(){const progress=getProgress();const nameMsg=document.getElementById('welcomeNameMsg');const nameSection=document.getElementById('nameEntrySection');if(progress.name&&progress.studentClass){if(nameMsg)nameMsg.textContent='Welcome back, '+progress.name+'! 👋';if(nameSection)nameSection.style.display='none';const cs=document.getElementById('studentClass');if(cs)cs.style.display='none';}else{if(nameMsg)nameMsg.textContent='Enter your name to get started:';if(nameSection)nameSection.style.display='block';}});
+
+
+window.addEventListener('DOMContentLoaded',function(){
+  const nameSection=document.getElementById('nameEntrySection');
+  if(nameSection)nameSection.style.display='block';
+});
 </script>
 </body>
 </html>
