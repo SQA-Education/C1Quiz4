@@ -213,19 +213,41 @@ window.addEventListener('DOMContentLoaded',function(){
   if(window.__sqaPortalSave)return; window.__sqaPortalSave=true;
   var U="https://ponilnhyehnzycspksah.supabase.co",K="sb_publishable_YWM3O7i8aHWBGOZM-vAnEw_bR4XStKm",LV="C1",SS=4;
   function g(id){var e=document.getElementById(id);return e?(''+e.value):'';}
-  function save(){
-    try{
-      var nm=g('studentName')||(typeof studentName!=='undefined'?studentName:'')||'';
-      var cl=g('className')||g('studentClass')||g('classSelect')||'';
-      if(!nm)return;
-      var mx=(typeof questions!=='undefined'&&questions&&questions.length)?questions.length:((typeof maxGrammar!=='undefined'&&maxGrammar)?maxGrammar:0);
-      var pct=null;try{if(typeof score!=='undefined'&&mx)pct=Math.round(score/mx*100);}catch(e){}
-      var sc={percent:pct,correct:(typeof score!=='undefined'?score:null),total:mx||null};
-      fetch(U+"/functions/v1/submit-final",{method:"POST",headers:{"Content-Type":"application/json","apikey":K,"Authorization":"Bearer "+K},body:JSON.stringify({name:nm,className:cl,level:LV,kind:"quiz",session:SS,scores:sc})}).catch(function(){});
-    }catch(e){}
+  function ui(html,showBtn){
+    var s=document.getElementById('submitStatus'),b=document.getElementById('formSubmitBtn');
+    if(s){s.style.display='block';s.innerHTML=html;}
+    if(b){ if(showBtn){b.style.display='block';b.disabled=false;b.textContent='📨 SUBMIT RESULTS TO TEACHER →';} else {b.style.display='none';} }
+  }
+  function scores(){
+    var mx=(typeof questions!=='undefined'&&questions&&questions.length)?questions.length:((typeof maxGrammar!=='undefined'&&maxGrammar)?maxGrammar:0);
+    var pct=null;try{if(typeof score!=='undefined'&&mx)pct=Math.round(score/mx*100);}catch(e){}
+    return {percent:pct,correct:(typeof score!=='undefined'?score:null),total:mx||null};
+  }
+  async function save(){
+    var nm=g('studentName')||(typeof studentName!=='undefined'?studentName:'')||'';
+    var cl=g('className')||g('studentClass')||g('classSelect')||'';
+    if(!nm){ ui('⚠️ <strong>We need your name.</strong><br><span style="font-size:.9em;color:#555">Go back, type your name, then submit again.</span>',true); return; }
+    var body=JSON.stringify({name:nm,className:cl,level:LV,kind:"quiz",session:SS,scores:scores()});
+    for(var i=0;i<3;i++){
+      try{
+        var r=await fetch(U+"/functions/v1/submit-final",{method:"POST",headers:{"Content-Type":"application/json","apikey":K,"Authorization":"Bearer "+K},body:body});
+        var j={}; try{ j=await r.json(); }catch(e){}
+        if(r.ok && j && j.status==='ok'){ ui('✅ <strong>Results submitted successfully!</strong><br><span style="font-size:.9em;color:#555">Your teacher has received your quiz results.</span>',false); return; }
+        if(j && (j.status==='no_student'||j.status==='not_enrolled')){ ui('⚠️ <strong>We could not find your class.</strong><br><span style="font-size:.9em;color:#555">Check that your name matches how you registered, then tap the button again.</span>',true); return; }
+      }catch(e){}
+      await new Promise(function(res){setTimeout(res,900*(i+1));});
+    }
+    ui('⚠️ <strong>Not sent — please tap the button again.</strong><br><span style="font-size:.9em;color:#555">Your internet dropped for a second. Your results were NOT saved yet.</span>',true);
   }
   var _o=window.submitToTeacher;
-  if(typeof _o==='function'){window.submitToTeacher=function(){try{save();}catch(e){}return _o.apply(this,arguments);};}
+  if(typeof _o==='function'){
+    window.submitToTeacher=function(){
+      var r; try{ r=_o.apply(this,arguments); }catch(e){}
+      ui('⏳ <strong>Sending to your teacher…</strong>',false);
+      try{ save(); }catch(e){ ui('⚠️ <strong>Not sent — please tap the button again.</strong>',true); }
+      return r;
+    };
+  }
 })();
 </script>
 </body>
